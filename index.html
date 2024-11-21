@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tetris Game</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <div class="game-container">
+      <div class="game-board" id="gameBoard"></div>
+      <div class="info-panel">
+        <div>
+          <h3>Próxima Peça</h3>
+          <div class="next-piece" id="nextPiece"></div>
+        </div>
+        <div class="score-panel">
+          <h3>Pontuação</h3>
+          <div class="score" id="score">0</div>
+        </div>
+        <div class="controls">
+          <h3>Controles</h3>
+          <p>← : Mover para esquerda</p>
+          <p>→ : Mover para direita</p>
+          <p>↓ : Mover para baixo</p>
+          <p>↑ : Rotacionar</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="game-over" id="gameOver">
+      <h2>Game Over!</h2>
+      <p>Sua pontuação: <span id="finalScore">0</span></p>
+      <button class="new-game-btn" id="newGameBtn">Novo Jogo</button>
+    </div>
+  </body>
+</html>
