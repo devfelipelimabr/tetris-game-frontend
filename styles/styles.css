@@ -337,22 +337,23 @@ body {
 
     .score-panel {
         position: absolute;
-        top: 1.15rem;
-        right: 1rem;
+        top: 11px;
+        right: 11px;
         width: min-content;
         min-width: 5rem;
     }
 
     .level-panel {
         position: absolute;
-        top: 1.15rem;
-        left: 1rem;
+        top: 11px;
+        left: 11px;
         width: min-content;
         min-width: 5rem;
     }
 
     .mobile-controls {
         display: flex;
+        margin-left: 1rem;
     }
 
     .main-container {
