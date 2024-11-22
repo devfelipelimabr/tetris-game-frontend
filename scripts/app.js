@@ -6,6 +6,7 @@ $(document).ready(function () {
 
     const API = {
         BASE_URL: 'http://localhost:3000',
+        BASE_WS_URL: 'ws://localhost:3000',
         AUTH: {
             LOGIN: '/auth/login',
             REGISTER: '/auth/register',
@@ -241,7 +242,7 @@ $(document).ready(function () {
     }
 
     function connectWebSocket() {
-        ws = new WebSocket(`ws://localhost:3000?token=${token}`);
+        ws = new WebSocket(`${API.BASE_WS_URL}?token=${token}`);
 
         ws.onopen = function () {
             console.log('Connected to server');
