@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tetris Game</title>
-    <link rel="shortcut icon" href="imgs/favicon.png" type="image/png">
+    <link rel="shortcut icon" href="imgs/favicon.png" type="image/png" />
     <link rel="stylesheet" href="styles/styles.css" />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="scripts/app.js" defer></script>
@@ -68,9 +68,19 @@
         <div class="game-container">
           <div class="game-board" id="gameBoard"></div>
           <div class="info-panel">
-            <div>
-              <h3>Next Piece</h3>
-              <div class="next-piece" id="nextPiece"></div>
+            <div id="control-container">
+              <div class="container">
+                <h3>Next Piece</h3>
+                <div class="next-piece" id="nextPiece"></div>
+              </div>
+              <div class="mobile-controls">
+                <button class="control-btn" id="btnLeft">←</button>
+                <div class="vertical-controls">
+                  <button class="control-btn" id="btnRotate">↑</button>
+                  <button class="control-btn" id="btnDown">↓</button>
+                </div>
+                <button class="control-btn" id="btnRight">→</button>
+              </div>
             </div>
             <div class="score-panel">
               <h3>Score</h3>

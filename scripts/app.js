@@ -329,4 +329,33 @@ $(document).ready(function () {
     } else {
         showAuth();
     }
+
+    // Controls
+    $('#btnLeft').on('click', function () {
+        sendGameCommand('MOVE_LEFT');
+    });
+
+    $('#btnRight').on('click', function () {
+        sendGameCommand('MOVE_RIGHT');
+    });
+
+    $('#btnDown').on('click', function () {
+        sendGameCommand('MOVE_DOWN');
+    });
+
+    $('#btnRotate').on('click', function () {
+        sendGameCommand('ROTATE');
+    });
+
+    function sendGameCommand(action) {
+        if (gameId && ws) {
+            ws.send(
+                JSON.stringify({
+                    type: action,
+                    gameId: gameId,
+                })
+            );
+        }
+    }
+
 });
