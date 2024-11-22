@@ -2,6 +2,10 @@ $(document).ready(function () {
     let gameId = null;
     let ws = null;
 
+    function updateLevel(level) {
+        $('#level').text(level);
+    }
+
     function initBoard() {
         const board = $('#gameBoard');
         board.empty();
@@ -89,6 +93,7 @@ $(document).ready(function () {
                 updateBoard(data.gameState.board);
                 updateNextPiece(data.gameState.nextPiece);
                 updateScore(data.gameState.score);
+                updateLevel(data.gameState.level);
 
                 if (data.type === 'GAME_OVER') {
                     showGameOver(data.gameState.score);
