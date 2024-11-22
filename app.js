@@ -1,6 +1,164 @@
 $(document).ready(function () {
     let gameId = null;
     let ws = null;
+    let token = null;
+
+    const API = {
+        BASE_URL: 'http://localhost:3000',
+        AUTH: {
+            LOGIN: '/auth/login',
+            REGISTER: '/auth/register',
+            LOGOUT: '/auth/logout',
+        },
+        SCORES: {
+            SAVE: '/scores/save',
+            TOP: '/scores/top',
+            PERSONAL: '/scores/personal',
+        },
+    };
+
+    // Auth Functions
+    function switchAuthForm(formType) {
+        $('.auth-tab').removeClass('active');
+        $(`.auth-tab[data-form="${formType}"]`).addClass('active');
+        $('.auth-form').hide();
+        $(`#${formType}Form`).show();
+    }
+
+    async function handleLogin(event) {
+        event.preventDefault();
+        try {
+            const response = await fetch(`${API.BASE_URL}${API.AUTH.LOGIN}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: $('#loginUsername').val(),
+                    password: $('#loginPassword').val(),
+                }),
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                token = data.token;
+                localStorage.setItem('token', token);
+                $('#username').text($('#loginUsername').val());
+                showGame();
+                connectWebSocket();
+            } else {
+                alert(data.error || 'Login failed');
+            }
+        } catch (error) {
+            alert('Error logging in');
+        }
+    }
+
+    async function handleRegister(event) {
+        event.preventDefault();
+        try {
+            const response = await fetch(`${API.BASE_URL}${API.AUTH.REGISTER}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: $('#regUsername').val(),
+                    email: $('#regEmail').val(),
+                    password: $('#regPassword').val(),
+                }),
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                token = data.token;
+                localStorage.setItem('token', token);
+                $('#username').text($('#regUsername').val());
+                showGame();
+                connectWebSocket();
+            } else {
+                alert(data.error || 'Registration failed');
+            }
+        } catch (error) {
+            alert('Error registering');
+        }
+    }
+
+    async function handleLogout() {
+        try {
+            await fetch(`${API.BASE_URL}${API.AUTH.LOGOUT}`, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            token = null;
+            localStorage.removeItem('token');
+            if (ws) {
+                ws.close();
+                ws = null;
+            }
+            showAuth();
+        } catch (error) {
+            alert('Error logging out');
+        }
+    }
+
+    function showAuth() {
+        $('#authContainer').show();
+        $('.main-container').hide();
+    }
+
+    function showGame() {
+        $('#authContainer').hide();
+        $('.main-container').show();
+        updateScores();
+    }
+
+    // Score Functions
+    async function updateScores() {
+        await updateTopScores();
+        await updatePersonalScores();
+    }
+
+    async function updateTopScores() {
+        try {
+            const response = await fetch(`${API.BASE_URL}${API.SCORES.TOP}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            const scores = await response.json();
+            displayScores(scores, '#topScores');
+        } catch (error) {
+            console.error('Error fetching top scores:', error);
+        }
+    }
+
+    async function updatePersonalScores() {
+        try {
+            const response = await fetch(`${API.BASE_URL}${API.SCORES.PERSONAL}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            const scores = await response.json();
+            displayScores(scores, '#personalScores');
+        } catch (error) {
+            console.error('Error fetching personal scores:', error);
+        }
+    }
+
+    function displayScores(scores, container) {
+        const $container = $(container);
+        $container.empty();
+
+        scores.forEach(score => {
+            $container.append(`
+                <div class="score-item">
+                    <span class="username">${score.username}</span>
+                    <span class="score-value">${score.score}</span>
+                </div>
+            `);
+        });
+    }
 
     function updateLevel(level) {
         $('#level').text(level);
@@ -65,24 +223,26 @@ $(document).ready(function () {
     function startNewGame() {
         $('#gameOver').fadeOut();
         if (ws) {
-            ws.send(JSON.stringify({
-                type: 'NEW_GAME',
-                gameId: gameId
-            }));
+            ws.send(
+                JSON.stringify({
+                    type: 'NEW_GAME',
+                    gameId: gameId,
+                })
+            );
         } else {
             connectWebSocket();
         }
     }
 
     function connectWebSocket() {
-        ws = new WebSocket('ws://localhost:3000');
+        ws = new WebSocket(`ws://localhost:3000?token=${token}`);
 
         ws.onopen = function () {
             console.log('Connected to server');
             initBoard();
         };
 
-        ws.onmessage = function (event) {
+        ws.onmessage = async function (event) {
             const data = JSON.parse(event.data);
 
             if (data.type === 'GAME_INITIALIZED') {
@@ -96,6 +256,8 @@ $(document).ready(function () {
                 updateLevel(data.gameState.level);
 
                 if (data.type === 'GAME_OVER') {
+                    await saveScore(data.gameState.score, data.gameState.level, gameId);
+                    await updateScores();
                     showGameOver(data.gameState.score);
                 }
             }
@@ -110,23 +272,40 @@ $(document).ready(function () {
         };
     }
 
+    async function saveScore(score, level, gameId) {
+        try {
+            await fetch(`${API.BASE_URL}${API.SCORES.SAVE}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ score, level, gameId }),
+            });
+        } catch (error) {
+            console.error('Error saving score:', error);
+        }
+    }
+
     function handleKeyPress(event) {
         if (!gameId || !ws) return;
 
         const keyActions = {
-            'ArrowLeft': 'MOVE_LEFT',
-            'ArrowRight': 'MOVE_RIGHT',
-            'ArrowDown': 'MOVE_DOWN',
-            'ArrowUp': 'ROTATE'
+            ArrowLeft: 'MOVE_LEFT',
+            ArrowRight: 'MOVE_RIGHT',
+            ArrowDown: 'MOVE_DOWN',
+            ArrowUp: 'ROTATE',
         };
 
         const action = keyActions[event.key];
         if (action) {
             event.preventDefault();
-            ws.send(JSON.stringify({
-                type: action,
-                gameId: gameId
-            }));
+            ws.send(
+                JSON.stringify({
+                    type: action,
+                    gameId: gameId,
+                })
+            );
         }
     }
 
@@ -134,6 +313,20 @@ $(document).ready(function () {
     $(document).on('keydown', handleKeyPress);
     $('#newGameBtn').on('click', startNewGame);
 
-    // Iniciar o jogo
-    connectWebSocket();
+    $('.auth-tab').on('click', function () {
+        switchAuthForm($(this).data('form'));
+    });
+    $('#loginForm').on('submit', handleLogin);
+    $('#registerForm').on('submit', handleRegister);
+    $('#logoutBtn').on('click', handleLogout);
+
+    // Check for existing token
+    const savedToken = localStorage.getItem('token');
+    if (savedToken) {
+        token = savedToken;
+        showGame();
+        connectWebSocket();
+    } else {
+        showAuth();
+    }
 });
