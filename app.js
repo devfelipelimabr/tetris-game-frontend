@@ -153,7 +153,7 @@ $(document).ready(function () {
         scores.forEach(score => {
             $container.append(`
                 <div class="score-item">
-                    <span class="username">${score.username}</span>
+                    <span class="username">${score.User ? score.User.username : ''}</span>
                     <span class="score-value">${score.score}</span>
                 </div>
             `);
