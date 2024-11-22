@@ -2,6 +2,7 @@ $(document).ready(function () {
     let gameId = null;
     let ws = null;
     let token = null;
+    let username = localStorage.getItem('username');
 
     const API = {
         BASE_URL: 'http://localhost:3000',
@@ -40,8 +41,9 @@ $(document).ready(function () {
             const data = await response.json();
             if (response.ok) {
                 token = data.token;
+                username = $('#loginUsername').val()
                 localStorage.setItem('token', token);
-                $('#username').text($('#loginUsername').val());
+                localStorage.setItem('username', username);
                 showGame();
                 connectWebSocket();
             } else {
@@ -68,8 +70,9 @@ $(document).ready(function () {
             const data = await response.json();
             if (response.ok) {
                 token = data.token;
+                username = $('#regUsername').val();
                 localStorage.setItem('token', token);
-                $('#username').text($('#regUsername').val());
+                localStorage.setItem('username', username);
                 showGame();
                 connectWebSocket();
             } else {
@@ -90,7 +93,9 @@ $(document).ready(function () {
             });
 
             token = null;
+            username = null;
             localStorage.removeItem('token');
+            localStorage.removeItem('username');
             if (ws) {
                 ws.close();
                 ws = null;
@@ -109,6 +114,7 @@ $(document).ready(function () {
     function showGame() {
         $('#authContainer').hide();
         $('.main-container').show();
+        $('#username').text(username + " !");
         updateScores();
     }
 
@@ -322,8 +328,10 @@ $(document).ready(function () {
 
     // Check for existing token
     const savedToken = localStorage.getItem('token');
-    if (savedToken) {
+    const savedUsername = localStorage.getItem('username');
+    if (savedToken && savedUsername) {
         token = savedToken;
+        username = savedUsername;
         showGame();
         connectWebSocket();
     } else {
