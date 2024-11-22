@@ -17,6 +17,7 @@ Este frontend é a interface gráfica do jogo de Tetris, permitindo aos jogadore
 5. [Interação com a API](#interação-com-a-api)
 6. [Como Usar](#como-usar)
 7. [Personalização](#personalização)
+8. [Funcionalidades Futuras](#funcionalidades-futuras)
 
 ---
 
@@ -79,9 +80,18 @@ Este frontend é a interface gráfica do jogo de Tetris, permitindo aos jogadore
   - **↓**: Move a peça para baixo.
   - **↑**: Rotaciona a peça.
 
-### **3. Novo Jogo**
+### **3. Sistema de Níveis**
+
+- Aumenta automaticamente o nível do jogador a cada 5 minutos.
+- A velocidade de descida das peças aumenta em 10% a cada nível.
+
+### **4. Novo Jogo**
 
 - O botão "Novo Jogo" reinicia o jogo atual enviando a mensagem `NEW_GAME` para o servidor.
+
+### **5. Proteção contra múltiplos salvamentos de pontuação**
+
+- Evita que a pontuação seja salva mais de uma vez ao finalizar o jogo.
 
 ---
 
@@ -92,7 +102,7 @@ Este frontend é a interface gráfica do jogo de Tetris, permitindo aos jogadore
 O frontend conecta-se à API via WebSocket na inicialização:
 
 ```javascript
-ws = new WebSocket('ws://localhost:3000');
+ws = new WebSocket('ws://localhost:3000?token=<seu-token>');
 ```
 
 ### **2. Mensagens Enviadas**
@@ -122,14 +132,18 @@ O frontend processa mensagens do servidor e atualiza a interface:
 ```javascript
 ws.onmessage = function (event) {
     const data = JSON.parse(event.data);
-    if (data.type === 'GAME_UPDATE' || data.type === 'LEVEL_UP') {
+
+    if (data.type === 'GAME_UPDATE') {
         updateBoard(data.gameState.board);
         updateNextPiece(data.gameState.nextPiece);
         updateScore(data.gameState.score);
-        updateLevel(data.gameState.level); // Atualiza o nível
+        updateLevel(data.gameState.level);
     }
     if (data.type === 'GAME_OVER') {
         showGameOver(data.gameState.score);
+    }
+    if (data.type === 'LEVEL_UP') {
+        updateLevel(data.gameState.level);
     }
 };
 ```
@@ -174,7 +188,7 @@ ws.onmessage = function (event) {
 - Altere a URL do WebSocket em `app.js` caso o servidor esteja rodando em um endereço ou porta diferente:
 
   ```javascript
-  ws = new WebSocket('ws://<seu-servidor>:<sua-porta>');
+  ws = new WebSocket('ws://<seu-servidor>:<sua-porta>?token=<seu-token>');
   ```
 
 ---
@@ -184,6 +198,7 @@ ws.onmessage = function (event) {
 - Adicionar suporte a jogos multiplayer.
 - Implementar salvamento de progresso no localStorage.
 - Melhorar animações e feedback visual.
+- Adicionar tema customizável para o jogo.
 
 ---
 
