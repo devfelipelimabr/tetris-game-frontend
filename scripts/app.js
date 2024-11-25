@@ -5,8 +5,8 @@ $(document).ready(function () {
     let username = localStorage.getItem('username');
 
     const API = {
-        BASE_URL: 'http://localhost:3000',
-        BASE_WS_URL: 'ws://localhost:3000',
+        BASE_URL: 'https://tetris-game-api.onrender.com',
+        BASE_WS_URL: 'wss://tetris-game-api.onrender.com',
         AUTH: {
             LOGIN: '/auth/login',
             REGISTER: '/auth/register',
