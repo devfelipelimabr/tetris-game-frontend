@@ -30,7 +30,11 @@
           <label for="loginPassword">Password</label>
           <input type="password" id="loginPassword" required />
         </div>
-        <button type="submit" class="auth-button">Login</button>
+        <button type="submit" class="auth-button">
+          <span class="button-text">Login</span>
+          <span class="spinner" style="display: none;"></span>
+        </button>
+
       </form>
 
       <!-- Register Form -->
@@ -47,7 +51,10 @@
           <label for="regPassword">Password</label>
           <input type="password" id="regPassword" required />
         </div>
-        <button type="submit" class="auth-button">Register</button>
+        <button type="submit" class="auth-button">
+          <span class="button-text">Register</span>
+          <span class="spinner" style="display: none;"></span>
+        </button>
       </form>
     </div>
   </div>
