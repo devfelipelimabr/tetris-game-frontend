@@ -29,6 +29,15 @@ $(document).ready(function () {
 
     async function handleLogin(event) {
         event.preventDefault();
+
+        const $button = $('#loginForm .auth-button');
+        const $spinner = $button.find('.spinner');
+        const $buttonText = $button.find('.button-text');
+
+        $button.prop('disabled', true);
+        $buttonText.hide();
+        $spinner.show();
+
         try {
             const response = await fetch(`${API.BASE_URL}${API.AUTH.LOGIN}`, {
                 method: 'POST',
@@ -42,7 +51,7 @@ $(document).ready(function () {
             const data = await response.json();
             if (response.ok) {
                 token = data.token;
-                username = $('#loginUsername').val()
+                username = $('#loginUsername').val();
                 localStorage.setItem('token', token);
                 localStorage.setItem('username', username);
                 showGame();
@@ -52,11 +61,25 @@ $(document).ready(function () {
             }
         } catch (error) {
             alert('Error logging in');
+        } finally {
+            $button.prop('disabled', false);
+            $buttonText.show();
+            $spinner.hide();
         }
     }
 
+
     async function handleRegister(event) {
         event.preventDefault();
+
+        const $button = $('#registerForm .auth-button');
+        const $spinner = $button.find('.spinner');
+        const $buttonText = $button.find('.button-text');
+
+        $button.prop('disabled', true);
+        $buttonText.hide();
+        $spinner.show();
+
         try {
             const response = await fetch(`${API.BASE_URL}${API.AUTH.REGISTER}`, {
                 method: 'POST',
@@ -81,8 +104,13 @@ $(document).ready(function () {
             }
         } catch (error) {
             alert('Error registering');
+        } finally {
+            $button.prop('disabled', false);
+            $buttonText.show();
+            $spinner.hide();
         }
     }
+
 
     async function handleLogout() {
         try {
