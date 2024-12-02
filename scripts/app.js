@@ -309,11 +309,7 @@ $(document).ready(async function () {
                     updateScore(data.gameState.score);
                     updateLevel(data.gameState.level);
 
-                if (data.type === 'GAME_OVER') {
-                if (data.type === 'GAME_OVER') {
-                    await saveScore(data.gameState.score, data.gameState.level, gameId);
                     if (data.type === 'GAME_OVER') {
-                    await saveScore(data.gameState.score, data.gameState.level, gameId);
                         await updateScores();
                         showGameOver(data.gameState.score);
                     }
