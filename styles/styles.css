@@ -27,7 +27,7 @@ body {
     background-color: #000;
     padding: 10px;
     border-radius: 5px;
-    margin-top: auto;
+    margin-bottom: auto;
     width: fit-content;
 }
 
@@ -80,6 +80,23 @@ body {
     font-size: 14px;
 }
 
+.controls select {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    background-color: #1a1a1a;
+    color: #fff;
+    border: 1px solid #333;
+    border-radius: 5px;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+.controls select:focus {
+    outline: none;
+    border-color: #4CAF50;
+}
+
 .game-over {
     display: none;
     position: absolute;
@@ -127,6 +144,30 @@ body {
     font-size: 24px;
     font-weight: bold;
     color: #4CAF50;
+}
+
+#time-attack-container {
+    display: none;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.time-panel,
+.target-score-panel {
+    background-color: #333;
+    padding: 15px;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.time,
+.target-score {
+    font-size: 24px;
+    font-weight: bold;
+    color: #FFA500;
+    /* Cor laranja para destaque */
 }
 
 /* Styles for authentication and leaderboard */
