@@ -34,7 +34,6 @@
           <span class="button-text">Login</span>
           <span class="spinner" style="display: none;"></span>
         </button>
-
       </form>
 
       <!-- Register Form -->
@@ -68,6 +67,17 @@
       </div>
     </div>
 
+    <div id="time-attack-container">
+      <div class="time-panel">
+        <h3>Time Remaining</h3>
+        <div class="time" id="timeRemaining"></div>
+      </div>
+      <div class="target-score-panel">
+        <h3>Target Score</h3>
+        <div class="target-score" id="targetScore"></div>
+      </div>
+    </div>
+
     <div class="content">
       <div class="leaderboard">
         <h2>Top Scores</h2>
@@ -82,6 +92,7 @@
               <h3>Next Piece</h3>
               <div class="next-piece" id="nextPiece"></div>
             </div>
+
             <div class="mobile-controls">
               <button class="control-btn" id="btnLeft">←</button>
               <div class="vertical-controls">
@@ -99,6 +110,13 @@
             <h3>Level</h3>
             <div class="level" id="level">1</div>
           </div>
+
+          <!-- Mode Selector -->
+          <div class="controls">
+            <h3>Select Game Mode</h3>
+            <select id="gameModeSelector"></select>
+          </div>
+
           <div class="controls">
             <h3>Controls</h3>
             <p>← : Move Left</p>

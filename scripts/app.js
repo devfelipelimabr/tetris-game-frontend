@@ -1,4 +1,4 @@
-$(document).ready(function () {
+$(document).ready(async function () {
     let gameId = null;
     let ws = null;
     let token = null;
@@ -13,11 +13,12 @@ $(document).ready(function () {
             LOGOUT: '/auth/logout',
         },
         SCORES: {
-            SAVE: '/scores/save',
             TOP: '/scores/top',
             PERSONAL: '/scores/personal',
         },
     };
+
+    await fetchGameModes();
 
     // Auth Functions
     function switchAuthForm(formType) {
@@ -257,11 +258,14 @@ $(document).ready(function () {
 
     function startNewGame() {
         $('#gameOver').fadeOut();
+        const gameMode = $('#gameModeSelector').val();
+        
         if (ws) {
             ws.send(
                 JSON.stringify({
                     type: 'NEW_GAME',
                     gameId: gameId,
+                    mode: gameMode,
                 })
             );
         } else {
@@ -270,7 +274,10 @@ $(document).ready(function () {
     }
 
     function connectWebSocket() {
-        ws = new WebSocket(`${API.BASE_WS_URL}?token=${token}`);
+        const gameMode = $('#gameModeSelector').val();
+       
+        // Inicializa o WebSocket com o modo de jogo selecionado e token de autenticação
+        ws = new WebSocket(`${API.BASE_WS_URL}?token=${token}&mode=${gameMode}`);
 
         ws.onopen = function () {
             console.log('Connected to server');
@@ -278,23 +285,37 @@ $(document).ready(function () {
         };
 
         ws.onmessage = async function (event) {
-            const data = JSON.parse(event.data);
+            try {
+                const data = JSON.parse(event.data);
 
-            if (data.type === 'GAME_INITIALIZED') {
-                gameId = data.gameId;
-            }
-
-            if (data.gameState) {
-                updateBoard(data.gameState.board);
-                updateNextPiece(data.gameState.nextPiece);
-                updateScore(data.gameState.score);
-                updateLevel(data.gameState.level);
-
-                if (data.type === 'GAME_OVER') {
-                    await saveScore(data.gameState.score, data.gameState.level, gameId);
-                    await updateScores();
-                    showGameOver(data.gameState.score);
+                // Lida com a inicialização do jogo
+                if (data.type === 'GAME_INITIALIZED') {
+                    gameId = data.gameId;
+                    console.log(`Game initialized!`);
                 }
+
+                // Lida com atualizações de tempo no modo Time Attack
+                if (data.type === 'TIME_ATTACK_UPDATE') {
+                    console.log('TIME_ATTACK_UPDATE received:', data.remainingTime);
+                    $("#time-attack-container").css("display", "flex");
+                    updateTimeRemaining(data.remainingTime);
+                    updateTargetScore(data.targetScore);
+                }
+
+                // Lida com atualizações gerais do estado do jogo
+                if (data.gameState) {
+                    updateBoard(data.gameState.board);
+                    updateNextPiece(data.gameState.nextPiece);
+                    updateScore(data.gameState.score);
+                    updateLevel(data.gameState.level);
+
+                    if (data.type === 'GAME_OVER') {
+                        await updateScores();
+                        showGameOver(data.gameState.score);
+                    }
+                }
+            } catch (error) {
+                console.error('Error processing WebSocket message:', error);
             }
         };
 
@@ -305,21 +326,6 @@ $(document).ready(function () {
         ws.onclose = function () {
             console.log('Disconnected from server');
         };
-    }
-
-    async function saveScore(score, level, gameId) {
-        try {
-            await fetch(`${API.BASE_URL}${API.SCORES.SAVE}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({ score, level, gameId }),
-            });
-        } catch (error) {
-            console.error('Error saving score:', error);
-        }
     }
 
     function handleKeyPress(event) {
@@ -365,6 +371,60 @@ $(document).ready(function () {
         connectWebSocket();
     } else {
         showAuth();
+    }
+
+    // Restart with new mode
+    function restartGameWithNewMode() {
+        if (ws) {
+            ws.close();
+        }
+        connectWebSocket();
+    }
+
+    // Change game mode
+    $('#gameModeSelector').on('change', function () {
+        $("#time-attack-container").hide();
+        restartGameWithNewMode();
+    });
+
+    // Get game modes
+    async function fetchGameModes() {
+        try {
+            // Faz a requisição ao backend
+            const response = await fetch(`${API.BASE_URL}/game-modes`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch game modes');
+            }
+
+            // Obtém os dados da resposta
+            const data = await response.json();
+
+            // Limpa o seletor antes de adicionar novos modos
+            const $modeSelector = $('#gameModeSelector');
+            $modeSelector.empty();
+
+            // Itera pelos modos e cria as opções no seletor
+            data.modes.forEach((mode) => {
+                const { name, description } = data.details[mode];
+                $modeSelector.append(
+                    `<option value="${mode}">${name} - ${description}</option>`
+                );
+            });
+        } catch (error) {
+            console.error('Error fetching game modes:', error);
+            alert('Could not load game modes. Please try again later.');
+        }
+    }
+
+    // Mode Time Attack
+    function updateTimeRemaining(remainingTime) {
+        const minutes = Math.floor(remainingTime / 60000);
+        const seconds = Math.floor((remainingTime % 60000) / 1000);
+        $('#timeRemaining').text(`${minutes}:${seconds < 10 ? '0' : ''}${seconds}`);
+    }
+
+    function updateTargetScore(targetScore) {
+        $('#targetScore').text(targetScore);
     }
 
     // Controls
